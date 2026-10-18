@@ -7,74 +7,68 @@ const LNG_FIJA = '-102.29450';
 let rutasMap = {};
 let markers = [];
 
-// Mapa Leaflet
+// Mapa Leaflet con CartoDB Light
 const map = L.map('map').setView([21.88, -102.29], 13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19
 }).addTo(map);
 
-// --- 1. Cargar Rutas y Generar Chips (Tu código mejorado) ---
+// --- 1. Cargar Rutas y Generar Chips ---
 function cargarBarraRutas() {
     fetch('rutas_comerciales.json')
-        .then(response => {
-            if (!response.ok) throw new Error('No se pudo cargar rutas_comerciales.json');
-            return response.json();
-        })
-        .then(rutas => {
+        .then(r => r.json())
+        .then(data => {
             const contenedor = document.getElementById('chips-rutas');
             const contador = document.getElementById('total-rutas');
             contenedor.innerHTML = '';
+            rutasMap = data;
             
-            const llaves = Object.keys(rutas);
-            rutasMap = rutas; // Guardamos el mapa globalmente
-            contador.innerText = `${llaves.length} rutas disponibles`;
+            const llaves = Object.keys(rutasMap);
+            contador.innerText = `${llaves.length} rutas`;
 
             llaves.forEach(nombreRuta => {
                 const btn = document.createElement('button');
-                btn.className = "px-3 py-1.5 bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700 text-sm font-semibold rounded-full transition whitespace-nowrap shadow-sm border border-gray-200";
+                // APLICAMOS LA CLASE route-chip DEFINIDA EN TU CSS
+                btn.className = "route-chip px-4 py-2 text-sm whitespace-nowrap";
                 btn.innerText = `Ruta ${nombreRuta}`;
                 
                 btn.onclick = () => {
-                    // Removemos lo del input porque ya no lo usamos en el HTML actual
-                    buscar(nombreRuta); 
+                    buscar(nombreRuta);
                     
-                    // Resaltar botón activo
+                    // Manejo de la clase 'active' (Rosa Mexicano)
                     document.querySelectorAll('#chips-rutas button').forEach(b => {
-                        b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
-                        b.classList.add('bg-gray-100', 'text-gray-700');
+                        b.classList.remove('active');
                     });
-                    btn.classList.remove('bg-gray-100', 'text-gray-700');
-                    btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+                    btn.classList.add('active');
                 };
                 
                 contenedor.appendChild(btn);
             });
         })
-        .catch(error => {
-            console.error("Error cargando el catálogo de rutas:", error);
-            const contador = document.getElementById('total-rutas');
-            if(contador) contador.innerText = 'Error cargando';
+        .catch(e => {
+            console.error("Error cargando rutas:", e);
+            document.getElementById('total-rutas').innerText = 'Error';
         });
 }
 
-// --- 2. Lógica de Búsqueda (Unificada con tu estructura) ---
+// --- 2. Lógica de Búsqueda ---
 async function buscar(input) {
-    const results = document.getElementById('results');
     const status = document.getElementById('status');
+    const carousel = document.getElementById('unit-carousel');
     
-    if(results) results.innerHTML = '';
-    if(status) status.textContent = '🔍 Consultando API...';
+    status.textContent = '🔍 Consultando API...';
+    carousel.innerHTML = '';
 
-    // Limpiar mapa
     markers.forEach(m => map.removeLayer(m));
     markers = [];
-    if(markers.length) map.setView([21.88, -102.29], 13);
 
     let id = rutasMap[input.toUpperCase()];
     if (!id && /^\d+$/.test(input)) id = parseInt(input);
 
     if (!id) {
-        if(status) status.textContent = '❌ Ruta no encontrada.';
+        status.textContent = '❌ Ruta no encontrada.';
         return;
     }
 
@@ -108,18 +102,26 @@ async function buscar(input) {
                             const lat = parseFloat(campos[3]) / 100000;
                             const lon = -Math.abs(parseFloat(campos[4]) / 100000);
 
-                            // Mapa
-                            const marker = L.marker([lat, lon]).addTo(map).bindPopup(`<b>Unidad #${eco}</b><br>${sentido}`);
+                            // Marcador
+                            const marker = L.marker([lat, lon]).addTo(map).bindPopup(`<b>N° ${eco}</b><br>${sentido}`);
                             markers.push(marker);
                             bounds.extend([lat, lon]);
 
-                            // Lista
-                            if(results) {
-                                const div = document.createElement('div');
-                                div.className = "bg-white p-3 rounded border border-gray-200 flex justify-between items-center hover:shadow-md transition";
-                                div.innerHTML = `<div><span class="font-bold text-gray-800">Unidad #${eco}</span><span class="text-xs text-blue-600 ml-2">${sentido}</span></div><div class="text-right"><div class="text-sm font-mono text-gray-500">${lat.toFixed(5)}, ${lon.toFixed(5)}</div><a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" class="text-xs text-blue-500 mt-1 inline-block hover:underline">Ver mapa</a></div>`;
-                                results.appendChild(div);
-                            }
+                            // Tarjeta Flotante
+                            const card = document.createElement('div');
+                            card.className = "bg-white rounded-full p-3 shadow-md flex items-center min-w-[140px] border border-gray-100 hover:scale-105 transition-transform cursor-pointer";
+                            card.onclick = () => map.setView([lat, lon], 16);
+                            
+                            card.innerHTML = `
+                                <div class="flex flex-col flex-1">
+                                    <span class="text-sm font-bold text-purple-700">N° ${eco}</span>
+                                    <span class="text-[10px] text-gray-500 mt-0.5">${sentido}</span>
+                                </div>
+                                <div class="ml-2 bg-purple-50 p-2 rounded-full">
+                                    🚌
+                                </div>
+                            `;
+                            carousel.appendChild(card);
                         }
                     }
                 });
@@ -127,15 +129,15 @@ async function buscar(input) {
         });
 
         if (unidades.size > 0) {
-            if(status) status.textContent = `✅ Se encontraron ${unidades.size} unidades.`;
+            status.textContent = `✅ ${unidades.size} unidades encontradas.`;
             map.fitBounds(bounds);
         } else {
-            if(status) status.textContent = '❌ No hay unidades reportando en este momento.';
+            status.textContent = '❌ No hay unidades reportando.';
         }
 
     } catch (error) {
         console.error(error);
-        if(status) status.textContent = '❌ Error de conexión.';
+        status.textContent = '❌ Error de conexión.';
     }
 }
 

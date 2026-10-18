@@ -4,29 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rastreador Yovoy</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Leaflet CSS (Mapas) -->
+    <!-- Tu CSS Personalizado -->
+    <link rel="stylesheet" href="css/css.css">
+    
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-    <link rel="stylesheet" href="css/css.css">
     <style>
-        /* Estilos del mapa */
-        #map { height: 300px; width: 100%; border-radius: 0.5rem; margin-top: 1rem; }
-        @media (min-width: 640px) { #map { height: 400px; } }
-        
-        /* Ocultar scrollbar pero permitir scroll */
-        .scrollbar-none::-webkit-scrollbar { display: none; }
-        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Estilo para scroll horizontal en iOS */
-        .scroll-x-smooth { -webkit-overflow-scrolling: touch; }
+        /* Ajustes específicos de estilo para esta versión */
+        body {
+            /* Usa la variable de fondo de tu CSS */
+            background-color: var(--yovoy-bg, #e5e5e5); 
+        }
+        .route-chip {
+            transition: all 0.2s ease;
+        }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen p-4 pb-10">
+<body class="min-h-screen p-4 pb-10">
     
     <div class="max-w-2xl mx-auto">
-        <!-- LOGO Multicolor -->
+        <!-- LOGO Multicolor (Institucional) -->
         <div class="flex justify-center mb-6">
             <div class="flex items-center justify-center space-x-1 font-black text-3xl tracking-wider">
                 <span style="color: #ffcc00;">Y</span>
@@ -38,18 +39,15 @@
             </div>
         </div>
 
-        <!-- BARRA DE RUTAS -->
-        <div class="bg-white shadow-md rounded-xl p-3 mb-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-bold text-gray-700">🚌 Selecciona una Ruta</span>
-                <span id="total-rutas" class="text-xs text-gray-500">Cargando...</span>
+        <!-- BARRA DE RUTAS (Fondo morado institucional si prefieres) -->
+        <!-- Usaremos el fondo blanco pero con el estilo de píldora -->
+        <div class="yovoy-header rounded-xl p-4 mb-4">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-sm font-bold text-white">🚌 Selecciona una Ruta</span>
+                <span id="total-rutas" class="text-xs text-white/80">Cargando...</span>
             </div>
             <div id="chips-rutas" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none scroll-x-smooth">
                 <!-- Los botones se generarán con JS -->
-                <div class="flex gap-2 animate-pulse">
-                    <div class="h-8 w-20 bg-gray-200 rounded-full"></div>
-                    <div class="h-8 w-20 bg-gray-200 rounded-full"></div>
-                </div>
             </div>
         </div>
 
@@ -57,9 +55,9 @@
         <div id="status" class="text-sm mb-4 text-gray-600 text-center font-medium"></div>
 
         <!-- TARJETAS FLOTANTES (Carrusel) -->
-        <div class="bg-white/50 backdrop-blur-sm rounded-xl p-3 mb-4 border border-white/50 shadow-sm">
+        <div class="bg-white/80 backdrop-blur-sm rounded-xl p-3 mb-4 border border-white/50 shadow-md">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">Unidades en Ruta</span>
+                <span class="text-xs font-bold text-gray-700 uppercase tracking-wide">Unidades en Ruta</span>
             </div>
             <div id="unit-carousel" class="flex gap-3 overflow-x-auto pb-2 scrollbar-none scroll-x-smooth">
                 <!-- Las tarjetas se inyectarán aquí -->
@@ -67,7 +65,7 @@
         </div>
 
         <!-- MAPA -->
-        <div class="bg-white rounded-xl p-1 shadow-lg border border-gray-200">
+        <div class="bg-white rounded-xl p-1 shadow-lg border border-gray-200 overflow-hidden">
             <div id="map"></div>
         </div>
     </div>
