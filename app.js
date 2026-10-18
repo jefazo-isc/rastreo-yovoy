@@ -3,7 +3,7 @@
 // =============================================================================
 
 // ⚠️ URL directa de tu Google Apps Script (No concatenar nada extra)
-const PROXY_URL = 'https://script.google.com/macros/s/AKfycbySYCmXS64CUeEIN21BE1UmK-hOaPsEmpEZwVpgu_LOh2zPTxf3N0lQrIZVRL2gIITuMQ/exec';
+const PROXY_URL = 'https://rastreo-yovoy.vercel.app/api/proxy';
 
 const UUID_CLIENTE = '5f39c1fe-4bab-4dad-b51d-595fb5edc190';
 const LAT_FIJA = '21.88234';
