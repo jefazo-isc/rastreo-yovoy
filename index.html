@@ -4,35 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rastreador Yovoy</title>
-    <!-- Tailwind -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Leaflet CSS -->
+    <!-- Leaflet CSS (Mapas) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
+
+    <link rel="stylesheet" href="css/css.css">
     <style>
+        /* Estilos del mapa */
         #map { height: 300px; width: 100%; border-radius: 0.5rem; margin-top: 1rem; }
-        /* Ajuste para móviles */
         @media (min-width: 640px) { #map { height: 400px; } }
+        
+        /* Ocultar scrollbar pero permitir scroll */
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Estilo para scroll horizontal en iOS */
+        .scroll-x-smooth { -webkit-overflow-scrolling: touch; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-2xl">
-        <h1 class="text-2xl font-bold mb-4">🚌 Rastreo de Unidades</h1>
-        
-        <!-- Formulario -->
-        <div class="flex gap-2 mb-4">
-            <input type="text" id="rutaInput" placeholder="Ej: 40N" class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <button id="buscarBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Buscar</button>
+<body class="bg-gray-50 min-h-screen p-4 pb-10">
+    
+    <div class="max-w-2xl mx-auto">
+        <!-- LOGO Multicolor -->
+        <div class="flex justify-center mb-6">
+            <div class="flex items-center justify-center space-x-1 font-black text-3xl tracking-wider">
+                <span style="color: #ffcc00;">Y</span>
+                <span style="color: #00aeef;">O</span>
+                <span style="color: #ec008c;">V</span>
+                <span style="color: #00aeef;">O</span>
+                <span style="color: #ffcc00;">Y</span>
+                <span style="color: #ec008c;" class="text-2xl">!</span>
+            </div>
         </div>
 
-        <!-- Estado -->
-        <div id="status" class="text-sm mb-2 text-gray-600">Listo para buscar.</div>
+        <!-- BARRA DE RUTAS -->
+        <div class="bg-white shadow-md rounded-xl p-3 mb-4">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-bold text-gray-700">🚌 Selecciona una Ruta</span>
+                <span id="total-rutas" class="text-xs text-gray-500">Cargando...</span>
+            </div>
+            <div id="chips-rutas" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none scroll-x-smooth">
+                <!-- Los botones se generarán con JS -->
+                <div class="flex gap-2 animate-pulse">
+                    <div class="h-8 w-20 bg-gray-200 rounded-full"></div>
+                    <div class="h-8 w-20 bg-gray-200 rounded-full"></div>
+                </div>
+            </div>
+        </div>
 
-        <!-- Resultados en lista -->
-        <div id="results" class="space-y-2 mb-4"></div>
+        <!-- ESTADO -->
+        <div id="status" class="text-sm mb-4 text-gray-600 text-center font-medium"></div>
 
-        <!-- Mapa -->
-        <div id="map"></div>
+        <!-- TARJETAS FLOTANTES (Carrusel) -->
+        <div class="bg-white/50 backdrop-blur-sm rounded-xl p-3 mb-4 border border-white/50 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">Unidades en Ruta</span>
+            </div>
+            <div id="unit-carousel" class="flex gap-3 overflow-x-auto pb-2 scrollbar-none scroll-x-smooth">
+                <!-- Las tarjetas se inyectarán aquí -->
+            </div>
+        </div>
+
+        <!-- MAPA -->
+        <div class="bg-white rounded-xl p-1 shadow-lg border border-gray-200">
+            <div id="map"></div>
+        </div>
     </div>
 
     <!-- Leaflet JS -->

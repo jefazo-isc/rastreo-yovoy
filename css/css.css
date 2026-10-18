@@ -1,0 +1,37 @@
+:root {
+    --yovoy-purple: #4a237a;
+    --yovoy-pink: #ec008c;
+    --yovoy-bg: #e5e5e5;
+}
+
+body {
+    background-color: var(--yovoy-bg);
+    /* Fondo con patrón geométrico sutil similar al de la app */
+    background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+    background-size: 20px 20px;
+    font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
+}
+
+/* Barra superior institucional */
+.yovoy-header {
+    background-color: var(--yovoy-purple);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* Botones de ruta tipo píldora (activos en rosa mexicano) */
+.route-chip {
+    background: #ffffff;
+    color: #374151;
+    border-radius: 9999px;
+    padding: 8px 16px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    white-space: nowrap;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.route-chip.active {
+    background: var(--yovoy-pink);
+    color: #ffffff;
+}

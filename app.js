@@ -3,36 +3,78 @@ const PROXY_URL = 'https://rastreo-yovoy.vercel.app/api/proxy';
 const UUID_CLIENTE = '5f39c1fe-4bab-4dad-b51d-595fb5edc190';
 const LAT_FIJA = '21.88234';
 const LNG_FIJA = '-102.29450';
-let rutasMap = {};
 
-// Mapa
-const map = L.map('map').setView([21.88, -102.29], 14);
+let rutasMap = {};
+let markers = [];
+
+// Mapa Leaflet
+const map = L.map('map').setView([21.88, -102.29], 13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
-let markers = []; // Array para guardar los marcadores activos
 
-// Cargar rutas
-fetch('rutas_comerciales.json')
-    .then(r => r.json())
-    .then(d => rutasMap = d)
-    .catch(e => console.error('Error cargando rutas:', e));
+// --- 1. Cargar Rutas y Generar Chips (Tu código mejorado) ---
+function cargarBarraRutas() {
+    fetch('rutas_comerciales.json')
+        .then(response => {
+            if (!response.ok) throw new Error('No se pudo cargar rutas_comerciales.json');
+            return response.json();
+        })
+        .then(rutas => {
+            const contenedor = document.getElementById('chips-rutas');
+            const contador = document.getElementById('total-rutas');
+            contenedor.innerHTML = '';
+            
+            const llaves = Object.keys(rutas);
+            rutasMap = rutas; // Guardamos el mapa globalmente
+            contador.innerText = `${llaves.length} rutas disponibles`;
 
+            llaves.forEach(nombreRuta => {
+                const btn = document.createElement('button');
+                btn.className = "px-3 py-1.5 bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700 text-sm font-semibold rounded-full transition whitespace-nowrap shadow-sm border border-gray-200";
+                btn.innerText = `Ruta ${nombreRuta}`;
+                
+                btn.onclick = () => {
+                    // Removemos lo del input porque ya no lo usamos en el HTML actual
+                    buscar(nombreRuta); 
+                    
+                    // Resaltar botón activo
+                    document.querySelectorAll('#chips-rutas button').forEach(b => {
+                        b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                        b.classList.add('bg-gray-100', 'text-gray-700');
+                    });
+                    btn.classList.remove('bg-gray-100', 'text-gray-700');
+                    btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+                };
+                
+                contenedor.appendChild(btn);
+            });
+        })
+        .catch(error => {
+            console.error("Error cargando el catálogo de rutas:", error);
+            const contador = document.getElementById('total-rutas');
+            if(contador) contador.innerText = 'Error cargando';
+        });
+}
+
+// --- 2. Lógica de Búsqueda (Unificada con tu estructura) ---
 async function buscar(input) {
     const results = document.getElementById('results');
     const status = document.getElementById('status');
-    results.innerHTML = '';
-    status.textContent = '🔍 Consultando...';
+    
+    if(results) results.innerHTML = '';
+    if(status) status.textContent = '🔍 Consultando API...';
 
-    // Limpiar marcadores anteriores
+    // Limpiar mapa
     markers.forEach(m => map.removeLayer(m));
     markers = [];
+    if(markers.length) map.setView([21.88, -102.29], 13);
 
     let id = rutasMap[input.toUpperCase()];
     if (!id && /^\d+$/.test(input)) id = parseInt(input);
 
     if (!id) {
-        status.textContent = '❌ Ruta no encontrada.';
+        if(status) status.textContent = '❌ Ruta no encontrada.';
         return;
     }
 
@@ -47,7 +89,7 @@ async function buscar(input) {
         
         const [raw1, raw2] = await Promise.all([res1.text(), res2.text()]);
         const unidades = new Set();
-        let bounds = L.latLngBounds(); // Para ajustar el zoom
+        let bounds = L.latLngBounds(); 
 
         [raw1, raw2].forEach((raw, idx) => {
             if (!raw || raw.trim().length === 0) return;
@@ -66,37 +108,38 @@ async function buscar(input) {
                             const lat = parseFloat(campos[3]) / 100000;
                             const lon = -Math.abs(parseFloat(campos[4]) / 100000);
 
-                            // 1. Agregar marcador al mapa
-                            const marker = L.marker([lat, lon]).addTo(map).bindPopup(`
-                                <b>Unidad #${eco}</b><br>
-                                Sentido: ${sentido}
-                            `);
+                            // Mapa
+                            const marker = L.marker([lat, lon]).addTo(map).bindPopup(`<b>Unidad #${eco}</b><br>${sentido}`);
                             markers.push(marker);
                             bounds.extend([lat, lon]);
 
-                            // 2. Agregar a la lista
-                            const div = document.createElement('div');
-                            div.className = "bg-white p-3 rounded border border-gray-200 flex justify-between items-center";
-                            div.innerHTML = `<div><span class="font-bold">Unidad #${eco}</span><span class="text-xs text-blue-600 ml-2">${sentido}</span></div><div class="text-right"><div class="text-sm font-mono">${lat.toFixed(5)}, ${lon.toFixed(5)}</div><a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" class="text-xs text-blue-500">Ver en mapa</a></div>`;
-                            results.appendChild(div);
+                            // Lista
+                            if(results) {
+                                const div = document.createElement('div');
+                                div.className = "bg-white p-3 rounded border border-gray-200 flex justify-between items-center hover:shadow-md transition";
+                                div.innerHTML = `<div><span class="font-bold text-gray-800">Unidad #${eco}</span><span class="text-xs text-blue-600 ml-2">${sentido}</span></div><div class="text-right"><div class="text-sm font-mono text-gray-500">${lat.toFixed(5)}, ${lon.toFixed(5)}</div><a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" class="text-xs text-blue-500 mt-1 inline-block hover:underline">Ver mapa</a></div>`;
+                                results.appendChild(div);
+                            }
                         }
                     }
                 });
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error('Decoding error:', e); }
         });
 
-        if (markers.length > 0) {
-            status.textContent = `✅ Se encontraron ${unidades.size} unidades.`;
-            map.fitBounds(bounds); // Zoom automático para ver todos los puntos
+        if (unidades.size > 0) {
+            if(status) status.textContent = `✅ Se encontraron ${unidades.size} unidades.`;
+            map.fitBounds(bounds);
         } else {
-            status.textContent = '❌ No hay unidades reportando.';
+            if(status) status.textContent = '❌ No hay unidades reportando en este momento.';
         }
 
     } catch (error) {
         console.error(error);
-        status.textContent = '❌ Error de conexión.';
+        if(status) status.textContent = '❌ Error de conexión.';
     }
 }
 
-document.getElementById('buscarBtn').onclick = () => buscar(document.getElementById('rutaInput').value);
-document.getElementById('rutaInput').onkeypress = (e) => { if(e.key === 'Enter') buscar(e.target.value); };
+// --- 3. Inicialización ---
+document.addEventListener('DOMContentLoaded', () => {
+    cargarBarraRutas();
+});
