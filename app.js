@@ -112,6 +112,15 @@ function cambiarFiltroSentido(nuevoSentido) {
 }
 
 // --- 3. Renderizar Unidades y Trazados en el Mapa y Carrusel ---
+let trazadosMap = {};
+
+// Cargar trazados oficiales de circuitos si existen
+fetch('trazados_oficiales.json')
+    .then(r => r.json())
+    .then(data => { trazadosMap = data; })
+    .catch(() => {});
+
+// --- 3. Renderizar Unidades y Trazados en el Mapa y Carrusel ---
 function renderizarElementosMapa() {
     layerGroupIda.clearLayers();
     layerGroupRegreso.clearLayers();
@@ -126,21 +135,21 @@ function renderizarElementosMapa() {
 
     let bounds = L.latLngBounds();
 
-    // Dibujar circuito/polilínea si hay puntos para conectar
+    // Dibujar circuito/polilínea oficial continuo si existe
     ['Ida', 'Regreso'].forEach(sentido => {
         if (filtroSentidoActual !== 'Ambos' && filtroSentidoActual !== sentido) return;
 
-        const pts = unidadesActuales
-            .filter(u => u.sentido === sentido)
-            .map(u => [u.lat, u.lon]);
+        let pts = [];
+        if (trazadosMap[rutaActual] && trazadosMap[rutaActual][sentido]) {
+            pts = trazadosMap[rutaActual][sentido];
+        }
 
         if (pts.length > 1) {
             const colorPoly = sentido === 'Ida' ? '#00aeef' : '#e60000';
             const polyline = L.polyline(pts, {
                 color: colorPoly,
-                weight: 4,
-                opacity: 0.7,
-                dashArray: '6, 8',
+                weight: 5,
+                opacity: 0.85,
                 lineJoin: 'round'
             });
 
@@ -149,6 +158,7 @@ function renderizarElementosMapa() {
             } else {
                 layerGroupRegreso.addLayer(polyline);
             }
+            bounds.extend(polyline.getBounds());
         }
     });
 
