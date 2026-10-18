@@ -75,7 +75,23 @@
         </div>
 
         <!-- ESTADO -->
-        <div id="status" class="text-sm mb-4 text-gray-600 text-center font-medium"></div>
+        <div id="status" class="text-sm mb-3 text-gray-600 text-center font-medium"></div>
+
+        <!-- SELECTOR DE VISTA / SENTIDO (Ida / Regreso / Completo) -->
+        <div id="direction-control" class="flex items-center justify-between bg-white rounded-2xl p-2 px-3 mb-4 shadow-sm border border-gray-100">
+            <span class="text-xs font-bold text-gray-600">Sentido:</span>
+            <div class="flex gap-1.5" id="direction-buttons">
+                <button id="btn-dir-ida" onclick="cambiarFiltroSentido('Ida')" class="px-3 py-1 text-xs font-semibold rounded-full transition-all border border-blue-500 bg-blue-500 text-white shadow-sm flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-white"></span> Ida
+                </button>
+                <button id="btn-dir-regreso" onclick="cambiarFiltroSentido('Regreso')" class="px-3 py-1 text-xs font-semibold rounded-full transition-all border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-red-500"></span> Regreso
+                </button>
+                <button id="btn-dir-ambos" onclick="cambiarFiltroSentido('Ambos')" class="px-3 py-1 text-xs font-semibold rounded-full transition-all border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 flex items-center gap-1">
+                    🔄 Ambos
+                </button>
+            </div>
+        </div>
 
         <!-- TARJETAS FLOTANTES (Carrusel) -->
         <div class="bg-white/80 backdrop-blur-sm rounded-xl p-3 mb-4 border border-white/50 shadow-md">
