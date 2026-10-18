@@ -4,20 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rastreador Yovoy</title>
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        #map { height: 300px; width: 100%; border-radius: 0.5rem; margin-top: 1rem; }
+        /* Ajuste para móviles */
+        @media (min-width: 640px) { #map { height: 400px; } }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
     <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-2xl">
         <h1 class="text-2xl font-bold mb-4">🚌 Rastreo de Unidades</h1>
         
-        <div class="flex gap-2 mb-6">
-            <input type="text" id="rutaInput" placeholder="Ruta (ej. 40N)" class="border p-2 rounded w-full">
-            <button id="buscarBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Buscar</button>
+        <!-- Formulario -->
+        <div class="flex gap-2 mb-4">
+            <input type="text" id="rutaInput" placeholder="Ej: 40N" class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button id="buscarBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Buscar</button>
         </div>
 
-        <div id="status" class="text-sm mb-4 text-gray-600">Listo.</div>
-        <div id="results" class="space-y-2"></div>
+        <!-- Estado -->
+        <div id="status" class="text-sm mb-2 text-gray-600">Listo para buscar.</div>
+
+        <!-- Resultados en lista -->
+        <div id="results" class="space-y-2 mb-4"></div>
+
+        <!-- Mapa -->
+        <div id="map"></div>
     </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
