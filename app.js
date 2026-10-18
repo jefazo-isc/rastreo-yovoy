@@ -1,15 +1,9 @@
-// CONFIGURACIÓN
 const PROXY_URL = 'https://rastreo-yovoy.vercel.app/api/proxy'; 
-const UUID_CLIENTE = '5f39c1fe-4bab-4dad-b51d-595fb5edc190';
-const LAT_FIJA = '21.88234';
-const LNG_FIJA = '-102.29450';
-let rutasMap = {};
+const UUID = '5f39c1fe-4bab-4dad-b51d-595fb5edc190';
+const LAT = '21.88234', LNG = '-102.29450';
+let rutas = {};
 
-// Cargar rutas
-fetch('rutas_comerciales.json')
-    .then(r => r.json())
-    .then(d => rutasMap = d)
-    .catch(e => console.error('Error cargando rutas:', e));
+fetch('rutas_comerciales.json').then(r => r.json()).then(d => rutas = d).catch(e => console.error(e));
 
 async function buscar(input) {
     const results = document.getElementById('results');
@@ -17,28 +11,22 @@ async function buscar(input) {
     results.innerHTML = '';
     status.textContent = '🔍 Consultando...';
 
-    let id = rutasMap[input.toUpperCase()];
+    let id = rutas[input.toUpperCase()];
     if (!id && /^\d+$/.test(input)) id = parseInt(input);
+    if (!id) { status.textContent = '❌ Ruta no encontrada.'; return; }
 
-    if (!id) {
-        status.textContent = '❌ Ruta no encontrada.';
-        return;
-    }
-
-    const payloadIda = `10#${UUID_CLIENTE}#0#0#1#${LAT_FIJA}#${LNG_FIJA}#${id}#${LAT_FIJA}#${LNG_FIJA}`;
-    const payloadRegreso = `10#${UUID_CLIENTE}#0#0#2#${LAT_FIJA}#${LNG_FIJA}#${id}#${LAT_FIJA}#${LNG_FIJA}`;
+    const makePayload = (sentido) => `10#${UUID}#0#0#${sentido}#${LAT}#${LNG}#${id}#${LAT}#${LNG}`;
 
     try {
-        // Hacemos las peticiones
+        // Pedimos al proxy (ahora devuelve texto directo)
         const [res1, res2] = await Promise.all([
-            fetch(PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: payloadIda }),
-            fetch(PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: payloadRegreso })
+            fetch(PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: makePayload(1) }),
+            fetch(PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: makePayload(2) })
         ]);
 
-        // Aquí extraemos 'data' del JSON que devuelve Vercel
-        const [res1Json, res2Json] = await Promise.all([res1.json(), res2.json()]);
-        const raw1 = res1Json.data;
-        const raw2 = res2Json.data;
+        // Leemos texto plano
+        const raw1 = await res1.text();
+        const raw2 = await res2.text();
 
         const unidades = new Set();
 
