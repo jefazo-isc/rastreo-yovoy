@@ -130,7 +130,8 @@ async function buscar(input) {
 
         if (unidades.size > 0) {
             status.textContent = `✅ ${unidades.size} unidades encontradas.`;
-            map.fitBounds(bounds);
+            map.invalidateSize();
+            map.fitBounds(bounds, { padding: [30, 30] });
         } else {
             status.textContent = '❌ No hay unidades reportando.';
         }
@@ -144,4 +145,8 @@ async function buscar(input) {
 // --- 3. Inicialización ---
 document.addEventListener('DOMContentLoaded', () => {
     cargarBarraRutas();
+    setTimeout(() => {
+        map.invalidateSize();
+    }, 200);
 });
+

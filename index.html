@@ -22,6 +22,29 @@
         .route-chip {
             transition: all 0.2s ease;
         }
+        /* Altura obligatoria para que Leaflet dibuje el mapa */
+        #map {
+            height: 420px;
+            width: 100%;
+            border-radius: 0.75rem;
+            z-index: 1;
+        }
+        @media (min-width: 640px) {
+            #map {
+                height: 500px;
+            }
+        }
+        /* Ocultar barra de scroll en navegadores */
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .scroll-x-smooth {
+            -webkit-overflow-scrolling: touch;
+        }
     </style>
 </head>
 <body class="min-h-screen p-4 pb-10">
