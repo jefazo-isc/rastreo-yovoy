@@ -1,9 +1,15 @@
+// CONFIGURACIÓN
 const PROXY_URL = 'https://rastreo-yovoy.vercel.app/api/proxy'; 
-const UUID = '5f39c1fe-4bab-4dad-b51d-595fb5edc190';
-const LAT = '21.88234', LNG = '-102.29450';
-let rutas = {};
+const UUID_CLIENTE = '5f39c1fe-4bab-4dad-b51d-595fb5edc190';
+const LAT_FIJA = '21.88234';
+const LNG_FIJA = '-102.29450';
+let rutasMap = {};
 
-fetch('rutas_comerciales.json').then(r => r.json()).then(d => rutas = d).catch(e => console.error(e));
+// Cargar rutas
+fetch('rutas_comerciales.json')
+    .then(r => r.json())
+    .then(d => rutasMap = d)
+    .catch(e => console.error('Error cargando rutas:', e));
 
 async function buscar(input) {
     const results = document.getElementById('results');
@@ -11,20 +17,34 @@ async function buscar(input) {
     results.innerHTML = '';
     status.textContent = '🔍 Consultando...';
 
-    let id = rutas[input.toUpperCase()];
+    let id = rutasMap[input.toUpperCase()];
     if (!id && /^\d+$/.test(input)) id = parseInt(input);
-    if (!id) { status.textContent = '❌ Ruta no encontrada.'; return; }
 
-    const makePayload = (sentido) => `10#${UUID}#0#0#${sentido}#${LAT}#${LNG}#${id}#${LAT}#${LNG}`;
+    if (!id) {
+        status.textContent = '❌ Ruta no encontrada.';
+        return;
+    }
+
+    // Generar payloads
+    const payloadIda = `10#${UUID_CLIENTE}#0#0#1#${LAT_FIJA}#${LNG_FIJA}#${id}#${LAT_FIJA}#${LNG_FIJA}`;
+    const payloadRegreso = `10#${UUID_CLIENTE}#0#0#2#${LAT_FIJA}#${LNG_FIJA}#${id}#${LAT_FIJA}#${LNG_FIJA}`;
 
     try {
-        // Pedimos al proxy (ahora devuelve texto directo)
+        // Enviar JSON al proxy
         const [res1, res2] = await Promise.all([
-            fetch(PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: makePayload(1) }),
-            fetch(PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: makePayload(2) })
+            fetch(PROXY_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ payload: payloadIda }) 
+            }),
+            fetch(PROXY_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ payload: payloadRegreso }) 
+            })
         ]);
 
-        // Leemos texto plano
+        // Leer texto plano directo (sin .json())
         const raw1 = await res1.text();
         const raw2 = await res2.text();
 
@@ -53,14 +73,14 @@ async function buscar(input) {
                         }
                     }
                 });
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error('Decoding error:', e); }
         });
 
         status.textContent = `✅ Se encontraron ${unidades.size} unidades.`;
 
     } catch (error) {
-        console.error(error);
-        status.textContent = '❌ Error de conexión.';
+        console.error('Network Error:', error);
+        status.textContent = '❌ Error de conexión. Revisa consola.';
     }
 }
 
