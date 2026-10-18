@@ -7,12 +7,11 @@ const LNG_FIJA = '-102.29450';
 let rutasMap = {};
 let markers = [];
 
-// Mapa Leaflet con CartoDB Light
-const map = L.map('map').setView([21.88, -102.29], 13);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 19
+// Mapa Leaflet con OpenStreetMap (100% libre, sin API key)
+const map = L.map('map').setView([21.88234, -102.29450], 13);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
 // --- 1. Cargar Rutas y Generar Chips ---
